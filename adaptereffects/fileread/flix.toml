@@ -1,0 +1,6 @@
+[package]
+name        = "fileread"
+description = "test"
+version     = "0.1.0"
+flix        = "0.67.2"
+authors     = ["John Doe <john@example.com>"]
