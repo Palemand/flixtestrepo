@@ -1,0 +1,15 @@
+use Something.Two
+use Something.One
+enum Something {
+    case One(Int32)
+    case Two(Int32)
+}
+def matchError(): Unit \ IO =
+    let x = Something.One(3);
+    match x {
+        case One(num) => {
+            println("thstfh");
+            println("ksglkgj")
+        }
+        case Two(num) => ???
+    }

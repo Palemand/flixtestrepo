@@ -44,8 +44,6 @@ def runDns(): Unit \ IO =
     println(x)
 
 
-
-
 /* 
 RetryN
 RetryWithExponentialBackOff -- retrying but with increasingly longerdelay.
@@ -97,6 +95,8 @@ def runDnsUntil(): Unit \ {IO} =
 // kinda useless atm
 
 //RetryWithExponentialBackOff
+
+//kode fra anders
 def recDelay(f: Unit -> b \ ef, delay_t: Int64, now: Int64): b \ {Clock} + ef = 
     let newTime = Clock.currentTime(TimeUnit.Seconds);
     if (newTime > now + delay_t) {
@@ -106,9 +106,13 @@ def recDelay(f: Unit -> b \ ef, delay_t: Int64, now: Int64): b \ {Clock} + ef =
     }
 
 def wait(t: Int32): Unit \ Clock = 
-    let now = Clock.currentTime(TimeUnit.Seconds);
-    let t_64 = Int32.toInt64(t);
-    recDelay(() -> (), t_64, now)
+    if (t == 0) {
+        ()
+    } else {
+        let now = Clock.currentTime(TimeUnit.Seconds);
+        let t_64 = Int32.toInt64(t);
+        recDelay(() -> (), t_64, now)
+    }
 
 def transformingDelay(t: Int32, f: a -> b \ ef): a -> b \ ef + Clock = 
     let fkt = p -> {
@@ -118,6 +122,7 @@ def transformingDelay(t: Int32, f: a -> b \ ef): a -> b \ ef + Clock =
     fkt
 
 def retryWithExponentialBackOff(f: a -> Result[e, b] \ ef): a -> Result[e, b] \ ef + Clock =  retryer(0, f)
+
 def retryer(i: Int32, f: a -> Result[e, b] \ ef): a -> Result[e, b] \ ef + Clock =
     p -> {
         let r = f(p);
@@ -129,7 +134,7 @@ def retryer(i: Int32, f: a -> Result[e, b] \ ef): a -> Result[e, b] \ ef + Clock
             }
         }
     }
-//should just work
+//should just work? untested
 
 
 // RecoverWith: If something fails then do something else.
@@ -152,3 +157,12 @@ def runDnsRecoverWithPrint(): Unit \ IO =
     } with dnsRunWithRecover(recover);
     println(x)
 
+
+
+
+//can we combine?
+def runDnsNtimesBackoff(): Unit \ IO + Clock =
+    let x = run {
+        Dns.lookup("nellemannthorsen.notdk")
+    } with retry(5, retryWithExponentialBackOff(Dns.runWithIO));
+    println(x)
