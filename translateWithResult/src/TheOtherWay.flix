@@ -1,7 +1,7 @@
 use IoError.IoError
 
 //Hmmmm
-def lol(): Unit \ IO = {
+/* def lol(): Unit \ IO = {
     let res = run {
         translate(translateOther(translate(somethingWithResult)))()
     } with Dns.runWithIO;
@@ -9,7 +9,7 @@ def lol(): Unit \ IO = {
         case Ok(_x) => ()
         case Err(_t) => ()
     }
-}
+} */
 
 def runWithResultNormal(): Unit \ IO = {
     run {
@@ -41,3 +41,13 @@ def translateOther(f: (a -> b \ ef)): (a -> Result[IoError, b] \ (ef - Dns) + Dn
 /* def somethingWithoutResult2(): Unit \ Dns + IO =
     let res = Dns.lookup("nellemannthorsen.dk");
     println(res) */
+
+
+
+// THIS HERE IS THE IMPORTANT ONE
+def awawd(): Unit \ IO = 
+    let x = run {(run {
+        Dns.lookup("nellemannthorsen.dk")
+    } with translateOther)()}
+    with DnsWithResult.runWithIO;
+    println(x)

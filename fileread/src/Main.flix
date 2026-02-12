@@ -42,3 +42,8 @@ def main2(): String \ IO =
         str
     } with FileRead.runWithIO;
     "tis"
+
+def main3(): Result[IoError, Unit] \ IO=
+    run {
+        FileWriteWithResult.append({str = "hej\n"}, "filetobewrittento.txt")
+    } with FileWriteWithResult.runWithIO 
