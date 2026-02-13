@@ -41,7 +41,7 @@ def handleWithDns(f: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - DnsWithResult) 
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!()
     }
 
 def runWithDns(f: (Unit -> Result[e, b] \ ef) ): b \ (ef - DnsWithResult) + Dns = handleWithDns(f)()

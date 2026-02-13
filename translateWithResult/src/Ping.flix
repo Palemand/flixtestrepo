@@ -23,7 +23,7 @@ def handleWithPing(f: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - PingWithResult
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!()
     }
 
 def runWithPing(f: (Unit -> Result[e, b] \ ef) ): b \ (ef - PingWithResult) + Ping = handleWithPing(f)()

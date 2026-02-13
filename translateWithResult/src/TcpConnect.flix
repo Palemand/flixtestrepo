@@ -21,7 +21,7 @@ def handleWithTcpConnect(f: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - TcpConne
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!()
     }
 
 def runWithTcpConnect(f: (Unit -> Result[e, b] \ ef) ): b \ (ef - TcpConnectWithResult) + TcpConnect = handleWithTcpConnect(f)()

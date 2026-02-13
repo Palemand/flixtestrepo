@@ -21,7 +21,7 @@ def handleWithTcpBind(f: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - TcpBindWith
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!() 
     }
 
 def runWithTcpBind(f: (Unit -> Result[e, b] \ ef) ): b \ (ef - TcpBindWithResult) + TcpBind = handleWithTcpBind(f)()

@@ -1,103 +1,33 @@
-
 // This part shoul be in FileRead effect file
 def handleWithFileReadWithResult(func: (a -> b \ ef)): a -> Result[IoError, b] \ (ef - FileRead) + FileReadWithResult =
     y -> run {
         Ok(func(y))
     } with handler FileRead {
-        def exists(f, k) = {
-            match FileReadWithResult.exists(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def isDirectory(f, k) = {
-            match FileReadWithResult.isDirectory(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def isRegularFile(f, k) = {
-            match FileReadWithResult.isRegularFile(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def isReadable(f, k) = {
-            match FileReadWithResult.isReadable(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def isSymbolicLink(f, k) = {
-            match FileReadWithResult.isSymbolicLink(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def isWritable(f, k) = {
-            match FileReadWithResult.isWritable(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def isExecutable(f, k) = {
-            match FileReadWithResult.isExecutable(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def accessTime(f, k) = {
-            match FileReadWithResult.accessTime(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def creationTime(f, k) = {
-            match FileReadWithResult.creationTime(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def modificationTime(f, k) = {
-            match FileReadWithResult.modificationTime(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def size(f, k) = {
-            match FileReadWithResult.size(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def read(f, k) = {
-            match FileReadWithResult.read(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def readLines(f, k) = {
-            match FileReadWithResult.readLines(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def readBytes(f, k) = {
-            match FileReadWithResult.readBytes(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
-        def list(f, k) = {
-            match FileReadWithResult.list(f) {
-                case Ok(ok) => k(ok)
-                case Err(t) => Err(t)
-            }
-        }
+        def exists(f, k) = helper(FileReadWithResult.exists, k)(f)
+        def isDirectory(f, k) = helper(FileReadWithResult.isDirectory, k)(f)
+        def isRegularFile(f, k) = helper(FileReadWithResult.isReadable, k)(f)
+        def isReadable(f, k) = helper(FileReadWithResult.isReadable, k)(f)
+        def isSymbolicLink(f, k) = helper(FileReadWithResult.isSymbolicLink, k)(f)
+        def isWritable(f, k) = helper(FileReadWithResult.isWritable, k)(f)
+        def isExecutable(f, k) = helper(FileReadWithResult.isExecutable, k)(f)
+        def accessTime(f, k) = helper(FileReadWithResult.accessTime, k)(f)
+        def creationTime(f, k) = helper(FileReadWithResult.creationTime, k)(f)
+        def modificationTime(f, k) = helper(FileReadWithResult.modificationTime, k)(f)
+        def size(f, k) = helper(FileReadWithResult.size, k)(f)
+        def read(f, k) = helper(FileReadWithResult.read, k)(f)
+        def readLines(f, k) = helper(FileReadWithResult.readLines, k)(f)
+        def readBytes(f, k) = helper(FileReadWithResult.readBytes, k)(f)
+        def list(f, k) = helper(FileReadWithResult.list, k)(f)
     }
 
 def runWithFileReadWithResult(f: (Unit -> b \ ef)): Result[IoError, b] \ (ef - FileRead) + FileReadWithResult = handleWithFileReadWithResult(f)()
 
+
+def helper(f: a -> Result[IoError, b] \ ef, k: (b -> Result[IoError, c] \ ef2)): a -> Result[IoError, c] \ ef + ef2 =
+    x -> match f(x) {
+        case Ok(ok) => k(ok)
+        case Err(t) => Err(t)
+    }
 
 
 
@@ -125,7 +55,7 @@ def handleWithFileRead(func: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - FileRea
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!()
     }
 
 def runWithDnsFileRead(f: (Unit -> Result[e, b] \ ef) ): b \ (ef - FileReadWithResult) + FileRead = handleWithFileRead(f)()

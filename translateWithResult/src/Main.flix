@@ -35,11 +35,11 @@ def translate(f: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - DnsWithResult) + Dn
             let dnsRes = Dns.lookup(host);
             k(Ok(dnsRes))
         }
-        def lookupAll(host, k) = ???
+        def lookupAll(_host, _k) = unreachable!()
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!()
     }
 
 

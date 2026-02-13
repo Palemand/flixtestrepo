@@ -21,7 +21,7 @@ def handleWithTcpAccept(f: (a -> Result[e, b] \ ef) ): (a -> b \ (ef - TcpAccept
     };
     match x {
         case Ok(k) => k
-        case Err(_t) => unreachable!() //allegedly
+        case Err(_t) => unreachable!()
     }
 
 def runWithTcpAccept(f: (Unit -> Result[e, b] \ ef) ): b \ (ef - TcpAcceptWithResult) + TcpAccept = handleWithTcpAccept(f)()
