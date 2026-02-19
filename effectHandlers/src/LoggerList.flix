@@ -7,7 +7,7 @@ def handleWithList(f: a -> b \ ef): a -> (b, List[(Severity, RichString)]) \ (ef
     } with handler Logger {
         def log(s, m, k) = {
             let (res, lst) = k();
-            (res, List.append(lst, List#{(s,m)}))
+            (res, List.cons((s,m), lst))
         }
     }
 

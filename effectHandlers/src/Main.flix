@@ -16,12 +16,12 @@ def severity(): Unit \ IO =
 
 
 
-instance Eq[RichString] { //Everything has to be equal for this equality not just text
+instance Eq[RichString] {
     pub def eq(x: RichString, y: RichString): Bool = checkEqual(x, y)
 }
 
-pub def checkEqual(x: RichString, y: RichString): Bool = 
-    let (RichString.RichString(xChain), RichString.RichString(yChain)) = (x,y);
+pub def checkEqual(rs1: RichString, rs2: RichString): Bool = 
+    let (RichString.RichString(xChain), RichString.RichString(yChain)) = (rs1, rs2);
     let xyChain = Chain.zip(xChain, yChain);
     Chain.forAll((spans -> {
         let (RichString.Span.Span(xSpan), RichString.Span.Span(ySpan)) = spans;
