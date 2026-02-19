@@ -15,17 +15,17 @@ def severity(): Unit \ IO =
     ()
 
 
-
+//husk `RichString.checkEqual` i stedet
 instance Eq[RichString] {
     pub def eq(x: RichString, y: RichString): Bool = checkEqual(x, y)
 }
 
+// fjern alle `RichString.`
 pub def checkEqual(rs1: RichString, rs2: RichString): Bool = 
-    let (RichString.RichString(xChain), RichString.RichString(yChain)) = (rs1, rs2);
-    let xyChain = Chain.zip(xChain, yChain);
+    let (RichString.RichString(rs1Chain), RichString.RichString(rs2Chain)) = (rs1, rs2);
     Chain.forAll((spans -> {
-        let (RichString.Span.Span(xSpan), RichString.Span.Span(ySpan)) = spans;
-        let {text = xs, fgColor = xfg, bgColor = xbg, styles = xset} = xSpan;
-        let {text = ys, fgColor = yfg, bgColor = ybg, styles = yset} = ySpan;
-        xs == ys and xfg == yfg and xbg == ybg and xset == yset
-    }), xyChain)
+        let (RichString.Span.Span(rs1Span), RichString.Span.Span(rs2Span)) = spans;
+        let {text = rs1text, fgColor = rs1fg, bgColor = rs1bg, styles = rs1Styles} = rs1Span;
+        let {text = rs2text, fgColor = rs2fg, bgColor = rs2bg, styles = rs2Styles} = rs2Span;
+        rs1text == rs2text and rs1fg == rs2fg and rs1bg == rs2bg and rs1Styles == rs2Styles
+    }), Chain.zip(rs1Chain, rs2Chain))
