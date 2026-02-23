@@ -18,12 +18,12 @@ def runWithSeverityFilter(filter: Set[Severity], f: Unit -> b \ ef): b \ (ef - L
 
 
 
-def handleWithSeverityFilter2(filterFun: Severity -> Bool \ ef1, f: a -> b \ ef2): a -> b \ (ef1 - Logger) + Logger + ef2 = 
+def handleWithSeverityFilter2(filter: (RichString, Severity) -> Bool \ ef1, f: a -> b \ ef2): a -> b \ (ef2 - Logger) + Logger + ef1 = 
     x -> run {
         f(x)
     } with handler Logger {
         def log(s, m, k) = {
-            if (filterFun(s)) {
+            if (filter(m, s)) {
                 k(Logger.log(s,m))
             } else {
                 k()
@@ -31,4 +31,8 @@ def handleWithSeverityFilter2(filterFun: Severity -> Bool \ ef1, f: a -> b \ ef2
         }
     }
 
-def runWithSeverityFilter2(filter: Severity -> Bool \ ef1, f: Unit -> b \ ef2): b \ (ef1 - Logger) + Logger + ef2 = handleWithSeverityFilter2(filter, f)()
+def runWithSeverityFilter2(filter: (RichString, Severity) -> Bool \ ef1, f: Unit -> b \ ef2): b \ (ef2 - Logger) + Logger + ef1 = handleWithSeverityFilter2(filter, f)()
+
+
+def onlyLevels(set: Set[Severity]): (RichString, Severity) -> Bool = 
+    (_s, sev) -> Set.exists(a -> a == sev, set)
