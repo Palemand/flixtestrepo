@@ -10,12 +10,12 @@ def severity(): Unit \ IO =
         Logger.warn("warn");
         Logger.info("info");
         Set.empty()
-    } with runWithSeverityFilter(Set#{Severity.Fatal, Severity.Warn})
+    } with runWithFilter(onlyLevels(Set#{Severity.Fatal, Severity.Warn}))
     with Logger.runWithIO;
     ()
 
 
 //husk `RichString.checkEqual` i stedet
-instance Eq[RichString] {
-    pub def eq(x: RichString, y: RichString): Bool = checkEqual(x, y)
-}
+// instance Eq[RichString] {
+//     pub def eq(x: RichString, y: RichString): Bool = checkEqual(x, y)
+// }
