@@ -36,3 +36,6 @@ def runWithFilter(filter: (Severity, RichString) -> Bool \ ef1, f: Unit -> b \ e
 
 def onlyLevels(set: Set[Severity]): (Severity, RichString) -> Bool = 
     (sev, _) -> Set.exists(a -> a == sev, set)
+
+def atLeastLevel(s: Severity): (Severity, RichString) -> Bool = 
+    (sev, _) -> Order.greaterEqual(sev, s)
