@@ -63,3 +63,14 @@ def testRunWithFilter05(): Unit \ Assert =
         def log(_s, m, _k) = RichString.toString(m)
     };
     assertEq(expected = "ignored", res)
+
+@Test
+def testRunWithFilter06(): Unit \ Assert =
+    let res: String = run {
+        Logger.fatal("fatal");
+        "ignored"
+    } with runWithFilter(atLeastLevel(Severity.Warn))
+    with handler Logger {
+        def log(_s, m, _k) = RichString.toString(m)
+    };
+    assertEq(expected = "fatal", res)
