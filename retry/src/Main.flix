@@ -97,29 +97,6 @@ def runDnsUntil(): Unit \ {IO} =
 //RetryWithExponentialBackOff
 
 //kode fra anders
-def recDelay(f: Unit -> b \ ef, delay_t: Int64, now: Int64): b \ {Clock} + ef = 
-    let newTime = Clock.currentTime(TimeUnit.Seconds);
-    if (newTime > now + delay_t) {
-        f()
-    } else {
-        recDelay(f, delay_t, now)
-    }
-
-def wait(t: Int32): Unit \ Clock = 
-    if (t == 0) {
-        ()
-    } else {
-        let now = Clock.currentTime(TimeUnit.Seconds);
-        let t_64 = Int32.toInt64(t);
-        recDelay(() -> (), t_64, now)
-    }
-
-def transformingDelay(t: Int32, f: a -> b \ ef): a -> b \ ef + Clock = 
-    let fkt = p -> {
-        wait(t); 
-        f(p)
-    };
-    fkt
 
 def retryWithExponentialBackOff(f: a -> Result[e, b] \ ef): a -> Result[e, b] \ ef + Clock =  retryer(0, f)
 
@@ -129,7 +106,7 @@ def retryer(i: Int32, f: a -> Result[e, b] \ ef): a -> Result[e, b] \ ef + Clock
         match r {
             case Ok(x) => Ok(x)
             case Err(_t) => {
-                wait(i * i);
+                //wait(i * i);
                 retryer(i + 1, f)(p)
             }
         }

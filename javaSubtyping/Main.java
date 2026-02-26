@@ -1,4 +1,5 @@
 //Arraylist[Cat] forholdes på hvilken måde med List[Animal]?
+import java.time.*;
 import java.util.*;
 
 public class Main {
@@ -11,6 +12,17 @@ public class Main {
         cats.add(new Cat());
         processCats(cats); // works
         //processCats(cats); // this wont
+
+        LocalDateTime time = LocalDateTime.now();
+        int year = time.getYear();
+        int month = time.getMonthValue();
+        int day = time.getDayOfMonth();
+        int hours = time.getHour();
+        int minute = time.getMinute();
+        int second = time.getSecond();
+        int nano = time.getNano();
+        int millis = nano / 1000;
+
 
     }
     
