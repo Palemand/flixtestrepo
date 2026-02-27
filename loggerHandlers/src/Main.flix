@@ -33,3 +33,11 @@ def spanEquals(s1: RichString.Span, s2: RichString.Span): Bool =
     let RichString.Span.Span({text = t1, fgColor = fg1, bgColor = bg1, styles = style1}) = s1;
     let RichString.Span.Span({text = t2, fgColor = fg2, bgColor = bg2, styles = style2}) = s2;
     t1 == t2 and fg1 == fg2 and bg1 == bg2 and style1 == style2
+
+def stackOverflowList(): Unit \ IO =
+    let (_, l) = run {
+        foreach (_ <- List.range(0, 600)) {
+            Logger.info("I think you are hot")
+        }
+    } with runWithList;
+    List.forEach(s -> println(s), l)
