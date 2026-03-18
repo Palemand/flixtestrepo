@@ -58,7 +58,7 @@ def testRunWithFilter05(): Unit \ Assert =
     let res: String = run {
         Logger.info("info");
         "ignored"
-    } with runWithFilter(atLeastLevel(Severity.Warn))
+    } with runWithSeverityFilter(Warn)
     with handler Logger {
         def log(_s, m, _k) = RichString.toString(m)
     };
@@ -69,7 +69,7 @@ def testRunWithFilter06(): Unit \ Assert =
     let res: String = run {
         Logger.fatal("fatal");
         "ignored"
-    } with runWithFilter(atLeastLevel(Severity.Warn))
+    } with runWithSeverityFilter(Warn)
     with handler Logger {
         def log(_s, m, _k) = RichString.toString(m)
     };

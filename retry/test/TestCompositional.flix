@@ -3,8 +3,8 @@ use Assert.assertEq
 def test01(): Unit \ IO = 
     let pol = Retry.retry(Retry.limitRetries(100));
     let res = run {
-        pol(DnsWithResult.lookup)("jsdtlgkjdæglkjasrg.drlgkjdrkgj")
-    } with DnsWithResult.runWithIO
+        pol(Net.Dns.lookup)("Somesitehere.nothing")
+    } with Net.Dns.runWithIO
     with Clock.runWithIO
     with Console.runWithIO;
     println(res); ()
@@ -13,8 +13,8 @@ def test01(): Unit \ IO =
 def test02(): Unit \ IO =
     let pol = Retry.retry(Retry.combine(Retry.expBackoff(), Retry.limitRetries(5)));
     let res = run {
-        pol(DnsWithResult.lookup)("jsdtlgkjdæglkjasrg.drlgkjdrkgj")
-    } with DnsWithResult.runWithIO
+        pol(Net.Dns.lookup)("Somesitehere.nothing")
+    } with Net.Dns.runWithIO
     with Clock.runWithIO
     with Console.runWithIO;
     println(res); ()
@@ -23,12 +23,11 @@ def test02(): Unit \ IO =
 def test03(): Unit \ IO =
     let pol = Retry.retry(Retry.combine(Retry.constantBackoff(5), Retry.until(() -> true)));
     let res = run {
-        pol(DnsWithResult.lookup)("jsdtlgkjdæglkjasrg.drlgkjdrkgj")
-    } with DnsWithResult.runWithIO
+        pol(Net.Dns.lookup)("Somesitehere.nothing")
+    } with Net.Dns.runWithIO
     with Clock.runWithIO
     with Console.runWithIO;
     println(res); ()
-
 
 // Stub helper handler
 def runWithStub(f: Unit -> a \ ef ): a \ ef - Dns = 

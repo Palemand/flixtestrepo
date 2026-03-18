@@ -24,6 +24,15 @@ pub def runWithList(f: Unit -> b \ ef): (b, List[(Severity, RichString)]) \ (ef 
     /// In other words, returns a list of `(Severity, RichString)` that represents and is ordered by the calls to log.
     ///
     pub def handleWithList(f: a -> b \ ef): a -> (b, List[(Severity, RichString)]) \ (ef - Logger) =
+        x -> run {
+            (f(x), List.empty())
+        } with handler Logger {
+            def log(s, m, k) = {
+                let (r, l) = k();
+                (r, (s, m) :: l)
+            }
+        }
+    /* pub def handleWithList(f: a -> b \ ef): a -> (b, List[(Severity, RichString)]) \ (ef - Logger) =
         region rc {
             let list = Ref.fresh(rc, List.empty());
             x -> run {
@@ -34,7 +43,7 @@ pub def runWithList(f: Unit -> b \ ef): (b, List[(Severity, RichString)]) \ (ef 
                     k()
                 }
             }
-        }
+        } */
 
     ///
     /// Runs the `Logger` effect of the given function `f`.
