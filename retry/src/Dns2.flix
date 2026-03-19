@@ -1,3 +1,6 @@
+///
+/// A handler for the Net.Dns effect that adds retries. 
+///
 def dnsHandleWithRetry[ef1: Eff, ef2: Eff, b: Type](pol: Retry.Policy[ef1], f: Unit -> b \ ef2): b \ ef2 + ef1 + Time.Sleep + Sys.Console + Net.Dns =
     run {
         f()

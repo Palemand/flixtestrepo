@@ -2,33 +2,51 @@ mod Retry {
     use Retry.Policy
     use Policy.Policy
     use Time.Duration
-
+    ///
+    /// A retry policy. Consists of a function from the current retry count to an optional duration to wait.
+    ///
     pub enum Policy[ef: Eff] {
         case Policy(Int32 -> Option[Duration] \ ef)
     }
 
+    ///
+    /// A policy that limits retries to a given number.
+    ///
     pub def limitRetries(n: Int32): Policy[{}] \ {} =
         Policy(i -> {
             if (i < n) {Some(Time.Duration.zero())} else {None}}
         )
-    
+
     def backoff(f: (Int32 -> Duration \ ef )): Policy[ef] =
         Policy(i -> {
             Some(f(i))
         })
 
+    ///
+    /// A policy that provides a constant backoff between retries. 
+    ///
     pub def constantBackoff(dur: Duration): Policy[{}] = 
         backoff(_ -> dur)
+    
+    ///
+    /// A policy that provides an exponential backoff between retries. 
+    ///
     pub def expBackoff(): Policy[{}] = 
         backoff(i -> {
             Time.Duration.seconds(Int32.pow(base = i, 2))
         })
     
+    ///
+    /// A policy that makes it retry untill some condition is met.
+    ///
     pub def until(f: Unit -> Bool \ ef): Policy[ef] \ {} =
         Policy(_i -> {
             if (not f()) Some(Duration.zero()) else None
         })
 
+    ///
+    /// Combines two policies, giving a policy that halts if either parameter halts, and otherwise waits the maximum duration.
+    ///
     pub def combine(a: Policy[ef], b: Policy[ef2]): Policy[ef + ef2] = Policy(i -> {
             let (f1, f2) = match (a, b) {case (Policy(f1), Policy(f2)) => (f1, f2)};
             match (f1(i), f2(i)) {
@@ -37,6 +55,9 @@ mod Retry {
             }
         })
 
+    ///
+    /// A policy that halts after a given deadline.
+    ///
     pub def deadline(startTime: Int64, deadline: Duration): Policy[{Time.Clock}] =
         Policy(_ -> {
             let elapsed = Time.Clock.now() - startTime;
@@ -46,7 +67,10 @@ mod Retry {
                 Some(Time.Duration.milliseconds(0))
             }
         })
-    
+
+    ///
+    /// A method that adds jitter to a policy. Is best used as the final modification.
+    ///
     pub def addJitter(maxJitter: Duration, pol: Policy[ef]): Policy[ef + Math.Random] =
         Policy(i -> {
             let (Policy(f)) = pol;
@@ -63,7 +87,9 @@ mod Retry {
                 }
             }
         })
-
+    ///
+    /// The retry engine. Takes a policy and a function, and returns a function that behaves like the input function, but retries on errors according to the policy.
+    ///
     pub def retry[ef1: Eff, a: Type, b: Type, e: Type, ef2: Eff]
     (pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + ef2 + Time.Sleep + Sys.Console = 
         retryRec(pol, 0, f)
