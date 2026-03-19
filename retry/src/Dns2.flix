@@ -8,3 +8,25 @@ def dnsHandleWithRetry[ef1: Eff, ef2: Eff, b: Type](pol: Retry.Policy[ef1], f: U
         def lookup(host, k) = k(Retry.retry(pol, Net.Dns.lookup)(host))
         def lookupAll(host, k) = k(Retry.retry(pol, Net.Dns.lookupAll)(host))
     }
+
+def dnsHandleWithRetry2[ef2: Eff, b: Type](f: Unit -> b \ ef2): b \ (ef2 - Net.Dns) + Net.Dns + Time.Sleep + Retry = 
+    run {
+        f()
+    } with handler Net.Dns {
+        def lookup(host, k) = {
+            def loop(attempts: Int32): b \ (ef2 - Net.Dns) + Net.Dns + Time.Sleep + Retry = {
+                match Net.Dns.lookup(host) {
+                    case Ok(ip) => k(Ok(ip))
+                    case Err(e) => match Retry.ask(attempts) {
+                        case None => k(Err(e))
+                        case Some(dur) => {
+                            Time.Sleep.sleep(dur);
+                            loop(attempts + 1)
+                        }
+                    }
+                }
+            };
+            loop(0)
+        }
+        def lookupAll(_host, _k) = unreachable!()
+    }

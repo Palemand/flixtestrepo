@@ -1,5 +1,8 @@
+pub eff Retry {
+    def ask(attempts: Int32): Option[Time.Duration] 
+}
+
 mod Retry {
-    use Retry.Policy
     use Policy.Policy
     use Time.Duration
     ///
@@ -111,6 +114,21 @@ mod Retry {
                         }
                     }
                 }}
+                }
+            }
+        }
+    ///
+    /// Handler for the retry effect.
+    ///
+    pub def handle[ef1: Eff, b: Type, ef2: Eff](pol: Policy[ef1], f: Unit -> b \ ef2): b \ ef1 + (ef2 - Retry) =
+        run {
+            f()
+        } with handler Retry {
+            def ask(attempts, k) = {
+                let Policy(g) = pol;
+                match g(attempts) {
+                    case None => k(None)
+                    case Some(dur) => k(Some(dur))
                 }
             }
         }
