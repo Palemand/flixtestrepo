@@ -9,6 +9,7 @@ def dnsHandleWithRetry[ef1: Eff, ef2: Eff, b: Type](pol: Retry.Policy[ef1], f: U
         def lookupAll(host, k) = k(Retry.retry(pol, Net.Dns.lookupAll)(host))
     }
 
+// this uses the retry effect
 def dnsHandleWithRetry2[ef2: Eff, b: Type](f: Unit -> b \ ef2): b \ (ef2 - Net.Dns) + Net.Dns + Time.Sleep + Retry = 
     run {
         f()
