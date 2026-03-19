@@ -60,3 +60,16 @@ def test06(): Unit \ IO + Time.Clock =
     with Time.Sleep.runWithIO
     with Sys.Console.runWithIO;
     println(res)
+
+// effect tests
+@Test
+def test07(): Unit \ IO + Time.Clock=
+    let pol = Retry.combine(Retry.constantBackoff(Time.Duration.milliseconds(5)), Retry.deadline(Time.Clock.now(), Time.Duration.milliseconds(3000)));
+    let res = run {
+        Net.Dns.lookup("Somesitehere.nothing")
+    } with dnsHandleWithRetry2
+    with Retry.handle(pol)
+    with Net.Dns.runWithIO
+    with Time.Sleep.runWithIO
+    with Sys.Console.runWithIO;
+    println(res)
