@@ -1,5 +1,5 @@
 pub eff Retry {
-    def ask(attempts: Int32): Option[Time.Duration] 
+    def ask(i: Int32): Option[Time.Duration] 
 }
 
 mod Retry {
@@ -124,9 +124,9 @@ mod Retry {
         run {
             f()
         } with handler Retry {
-            def ask(attempts, k) = {
+            def ask(i, k) = {
                 let Policy(g) = pol;
-                match g(attempts) {
+                match g(i) {
                     case None => k(None)
                     case Some(dur) => k(Some(dur))
                 }
