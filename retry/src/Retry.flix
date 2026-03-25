@@ -3,7 +3,6 @@ pub eff Retry {
 }
 
 mod Retry {
-    use Retry.retryLoop
     use Policy.Policy
     use Time.Duration
     ///
@@ -12,6 +11,11 @@ mod Retry {
     pub enum Policy[ef: Eff] {
         case Policy(Int32 -> Option[Duration] \ ef)
     }
+    ///
+    /// Policy that does not retry
+    ///
+    pub def noRetry(): Policy[{}] \ {} = 
+        Policy(_ -> None)
 
     ///
     /// A policy that limits retries to a given number.
@@ -21,6 +25,9 @@ mod Retry {
             if (i < n) {Some(Time.Duration.zero())} else {None}}
         )
 
+    ///
+    /// Helper to assign various backoff functions
+    ///
     def backoff(f: (Int32 -> Duration \ ef )): Policy[ef] =
         Policy(i -> {
             Some(f(i))
@@ -33,9 +40,17 @@ mod Retry {
         backoff(_ -> dur)
     
     ///
-    /// A policy that provides an exponential backoff between retries. 
+    /// A policy that provides a capped exponential backoff between retries. 
     ///
-    pub def expBackoff(): Policy[{}] = 
+    pub def expBackoff(cap: Time.Duration): Policy[{}] = 
+        backoff(i -> {
+            Order.max(Time.Duration.seconds(Int32.pow(base = i, 2)), cap)
+        })
+    
+    ///
+    /// A policy that provides an uncapped exponential backoff between retries. 
+    ///
+    pub def expBackoffUncapped(): Policy[{}] = 
         backoff(i -> {
             Time.Duration.seconds(Int32.pow(base = i, 2))
         })
@@ -44,19 +59,8 @@ mod Retry {
     /// A policy that makes it retry untill some condition is met.
     ///
     pub def until(f: Unit -> Bool \ ef): Policy[ef] \ {} =
-        Policy(_i -> {
+        Policy(_ -> {
             if (not f()) Some(Duration.zero()) else None
-        })
-
-    ///
-    /// Combines two policies, giving a policy that halts if either parameter halts, and otherwise waits the maximum duration.
-    ///
-    pub def combine(a: Policy[ef], b: Policy[ef2]): Policy[ef + ef2] = Policy(i -> {
-            let (f1, f2) = match (a, b) {case (Policy(f1), Policy(f2)) => (f1, f2)};
-            match (f1(i), f2(i)) {
-                case (Some(r1), Some(r2)) => Some(Order.max(r1, r2))
-                case _ => None
-            }
         })
 
     ///
@@ -69,6 +73,17 @@ mod Retry {
                 None
             } else {
                 Some(Time.Duration.milliseconds(0))
+            }
+        })
+
+    ///
+    /// Combines two policies, giving a policy that halts if either parameter halts, and otherwise waits the maximum duration.
+    ///
+    pub def combine(a: Policy[ef], b: Policy[ef2]): Policy[ef + ef2] = Policy(i -> {
+            let (f1, f2) = match (a, b) {case (Policy(f1), Policy(f2)) => (f1, f2)};
+            match (f1(i), f2(i)) {
+                case (Some(r1), Some(r2)) => Some(Order.max(r1, r2))
+                case _ => None
             }
         })
 
@@ -118,13 +133,13 @@ mod Retry {
     ///
     pub def retry(pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + (ef2 - Retry) + Time.Sleep = 
         x -> run {
-            retryLoop(() -> f(x))
+            Retry.retryLoop(() -> f(x))
         } with Retry.handle(pol)
 
     ///
-    /// Handler for the retry effect.
+    /// Handler for the retry effect. Asks the given policy how to proceed.
     ///
-    pub def handle[ef1: Eff, b: Type, ef2: Eff](pol: Policy[ef1], f: Unit -> b \ ef2): b \ ef1 + (ef2 - Retry) =
+    pub def handle(pol: Policy[ef1], f: Unit -> b \ ef2): b \ ef1 + (ef2 - Retry) =
         run {
             f()
         } with handler Retry {
