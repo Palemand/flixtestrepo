@@ -3,6 +3,7 @@ pub eff Retry {
 }
 
 mod Retry {
+    use Retry.retryLoop
     use Policy.Policy
     use Time.Duration
     ///
@@ -91,6 +92,9 @@ mod Retry {
             }
         })
     
+    //
+    // Main engine for running retry loops. Asks the retry effect what to do.
+    //
     pub def retryLoop(f: Unit -> Result[e,b] \ ef1): Result[e, b]\ ef1 + Retry + Time.Sleep = 
         @Tailrec
         def loop(i: Int32): Result[e, b] \ ef1 + Retry + Time.Sleep = {
@@ -109,36 +113,14 @@ mod Retry {
         };
         loop(0)
     
-    /*
-    
     ///
-    /// The retry engine. Takes a policy and a function, and returns a function that behaves like the input function, but retries on errors according to the policy.
+    /// Method to apply directly to resultful functions, along with a policy, to avoid dealing with The Retry effect
     ///
-    pub def retry[ef1: Eff, a: Type, b: Type, e: Type, ef2: Eff]
-    (pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + ef2 + Time.Sleep + Sys.Console = 
-        retryRec(pol, 0, f)
-    
-    def retryRec[ef1: Eff, a: Type, b: Type, e: Type, ef2: Eff]
-    (pol: Policy[ef1], i: Int32, f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + ef2 + Time.Sleep + Sys.Console = 
-        x -> {
-            let res = f(x);
-            match res {
-                case Ok(ok) => Ok(ok)
-                case Err(e) => { match pol {case Policy(g) => {
-                    match g(i) {
-                        case None => Err(e)
-                        case Some(dur) => {
-                            //todo: Remove print
-                            Sys.Console.println("Waiting now " + ToString.toString(Time.Duration.toNanos(dur)) + " nanoseconds before retrying..."); 
-                            Time.Sleep.sleep(dur);
-                            retryRec(pol, i + 1, f, x) //tailrec?
-                        }
-                    }
-                }}
-                }
-            }
-        }
-    */
+    pub def retry(pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + (ef2 - Retry) + Time.Sleep = 
+        x -> run {
+            retryLoop(() -> f(x))
+        } with Retry.handle(pol)
+
     ///
     /// Handler for the retry effect.
     ///

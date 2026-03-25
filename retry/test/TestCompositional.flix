@@ -1,3 +1,4 @@
+import java.time.Duration
 // @Test
 // def test01(): Unit \ IO = 
 //     let pol = Retry.limitRetries(100);
@@ -31,16 +32,16 @@
 //     with Sys.Console.runWithIO;
 //     println(res)
 
-// //manually using the retry "engine"
-// @Test
-// def test04(): Unit \ IO =
-//     let retry = Retry.retry(Retry.combine(Retry.constantBackoff(Time.Duration.milliseconds(5)), Retry.until(() -> false)));
-//     let res = run {
-//         retry(Net.Dns.lookup)("Somesitehere.nothing")
-//     } with Net.Dns.runWithIO
-//     with Time.Sleep.runWithIO
-//     with Sys.Console.runWithIO;
-//     println(res)
+//manually using the retry "engine"
+@Test
+def test04(): Unit \ IO + Time.Clock =
+    let retry = Retry.retry(Retry.combine(Retry.constantBackoff(Time.Duration.milliseconds(5)), Retry.deadline(Time.Clock.now(), Time.Duration.milliseconds(100))));
+    let res = run {
+        retry(Net.Dns.lookup)("Somesitehere.nothing")
+    } with Net.Dns.runWithIO
+    with Time.Sleep.runWithIO
+    with Sys.Console.runWithIO;
+    println(res)
 
 // @Test
 // def test05(): Unit \ IO + Math.Random =
@@ -68,7 +69,7 @@
 // effect tests
 @Test
 def test07(): Unit \ IO + Time.Clock=
-    let pol = Retry.combine(Retry.constantBackoff(Time.Duration.milliseconds(5)), Retry.deadline(Time.Clock.now(), Time.Duration.milliseconds(3000)));
+    let pol = Retry.combine(Retry.constantBackoff(Time.Duration.milliseconds(5)), Retry.deadline(Time.Clock.now(), Time.Duration.milliseconds(10000)));
     let res = run {
         Net.Dns.lookup("Somesitehere.nothing")
     } with dnsHandler
