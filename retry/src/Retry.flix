@@ -12,7 +12,7 @@ mod Retry {
         case Policy(Int32 -> Option[Duration] \ ef)
     }
     ///
-    /// Policy that does not retry
+    /// A policy that never retries
     ///
     pub def noRetry(): Policy[{}] \ {} = 
         Policy(_ -> None)
