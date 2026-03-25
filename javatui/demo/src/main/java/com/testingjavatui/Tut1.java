@@ -1,7 +1,7 @@
 package com.testingjavatui;
 
 import java.io.IOException;
-
+import java.lang.Thread;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TextColor;
