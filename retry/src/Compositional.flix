@@ -90,6 +90,27 @@ mod Retry {
                 }
             }
         })
+    
+    pub def retryLoop(f: Unit -> Result[e,b] \ ef1): Result[e, b]\ ef1 + Retry + Time.Sleep = 
+        @Tailrec
+        def loop(i: Int32): Result[e, b] \ ef1 + Retry + Time.Sleep = {
+            match f() {
+                case Ok(ok) => Ok(ok)
+                case Err(e) => {
+                    match Retry.ask(i) {
+                        case None => Err(e)
+                        case Some(duration) => {
+                            Time.Sleep.sleep(duration);
+                            loop(i+1)
+                        }
+                    }
+                }
+            }
+        };
+        loop(0)
+    
+    /*
+    
     ///
     /// The retry engine. Takes a policy and a function, and returns a function that behaves like the input function, but retries on errors according to the policy.
     ///
@@ -117,6 +138,7 @@ mod Retry {
                 }
             }
         }
+    */
     ///
     /// Handler for the retry effect.
     ///
@@ -128,7 +150,9 @@ mod Retry {
                 let Policy(g) = pol;
                 match g(i) {
                     case None => k(None)
-                    case Some(dur) => k(Some(dur))
+                    case Some(dur) => {
+                        k(Some(dur))
+                    }
                 }
             }
         }

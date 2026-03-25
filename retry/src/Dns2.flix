@@ -1,3 +1,13 @@
+
+def dnsHandler(f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + Retry + Time.Sleep + Net.Dns = 
+    run {
+        f()
+    } with handler Net.Dns {
+        def lookup(host, k) = k(Retry.retryLoop(() -> Net.Dns.lookup(host)))
+        def lookupAll(host, k) = k(Retry.retryLoop(() -> Net.Dns.lookupAll(host)))
+    }
+
+/*
 ///
 /// A handler for the Net.Dns effect that adds retries. 
 ///
@@ -31,3 +41,5 @@ def dnsHandleWithRetry2[ef2: Eff, b: Type](f: Unit -> b \ ef2): b \ (ef2 - Net.D
         }
         def lookupAll(_host, _k) = unreachable!()
     }
+
+*/
