@@ -3,32 +3,44 @@ pub eff RateLimit {
 }
 
 mod RateLimit {
+    use Time.TimeUnit.Nanoseconds
     use Time.Duration
+
+    /// A generic wrapper to trigger the effect.
+    pub def limit(f: Unit -> a \ ef): Option[a] \ ef + RateLimit =
+        if (RateLimit.ask()) {
+            Some(f())
+        } else {
+            None
+        }
 
     ///
     /// Handler for the RateLimit effect.
     ///
     /// Uses the minimum interval policy to enforce a minimum interval between requests. Given in `ims`
     ///
-    pub def withMinInterval(ims: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Clock + Time.Sleep = 
+    pub def withMinInterval(ims: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Clock + Time.Sleep + IO = 
         region rc {
             let lastReq = Ref.fresh(rc, 0i64);
             let imsNanos = Time.Duration.toNanos(ims);
+            println("Minimum interval set to ${imsNanos} nanoseconds");
             run {
                 f()
             } with handler RateLimit {
                 def ask(k) = {
-                    let now = Time.Clock.now();
+                    let now = Time.Clock.currentTime(Nanoseconds);
                     let timeSinceLast = now - Ref.get(lastReq);
                     let wait = imsNanos - timeSinceLast;
+                    println("Time since last request: ${timeSinceLast}ns, need to wait: ${wait}ns");
                     if (wait > 0i64) {
                         Time.Sleep.sleep(Time.Duration.nanoseconds(wait))
                     };
-                    Ref.put(Time.Clock.now(), lastReq);
+                    Ref.put(Time.Clock.currentTime(Nanoseconds), lastReq);
                     k(true)
                 }
             }
         }
+    
     ///
     /// Handler for the RateLimit effect.
     ///
@@ -69,7 +81,7 @@ mod RateLimit {
     ///
     pub def withSlidingWindow(windowSize: Int32, windowDuration: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Sleep + Time.Clock =
         region rc {
-            ???   
+            ???
         }
 
 }
