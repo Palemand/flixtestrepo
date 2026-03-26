@@ -133,13 +133,19 @@ mod Retry {
         loop(0)
     
     ///
-    /// Method to apply directly to resultful functions, along with a policy, to avoid dealing with The Retry effect
+    /// Method to apply directly to resultful functions, along with a policy, avoiding the Retry effect.
     ///
-    pub def retry(pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + (ef2 - Retry) + Time.Sleep = 
-        x -> run {
-            Retry.retryLoop(_ -> true, () -> f(x))
-        } with Retry.handle(pol)
+    pub def retry(pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ (ef2 - Retry) + ef1 + Time.Sleep =
+        retryWhen(pol, _ -> true, f)
+        
 
+    ///
+    /// Method to appliy directly to resultful functions, along with a policy and a error filter, avoiding the Retry effect.
+    ///
+    pub def retryWhen(pol: Policy[ef1], g: e -> Bool \ ef3, f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ (ef2 + ef3 - Retry) + ef1 + Time.Sleep =
+        x -> run {
+            Retry.retryLoop(g, () -> f(x))
+        } with Retry.handle(pol)
     ///
     /// Handler for the retry effect. Asks the given policy how to proceed.
     ///
