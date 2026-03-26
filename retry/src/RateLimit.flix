@@ -45,7 +45,8 @@ mod RateLimit {
                 def ask(k) = {
                     let now = Time.Clock.now();
                     let timeSinceLast = now - Ref.get(lastUpdate);
-                    let newTokens = Int64.clampToInt32(min = 0, max = Int32.maxValue(), timeSinceLast / tokenDelayNanos);                    if (newTokens > 0) {
+                    let newTokens = Int64.clampToInt32(min = 0, max = Int32.maxValue(), timeSinceLast / tokenDelayNanos);
+                    if (newTokens > 0) {
                         Ref.put(Int32.min(bucketSize, Ref.get(bucket) + newTokens), bucket);
                         Ref.put(Ref.get(lastUpdate) + (Int32.toInt64(newTokens) * tokenDelayNanos), lastUpdate)
                     };
@@ -59,6 +60,16 @@ mod RateLimit {
                     k(true)   
                 }
             }
+        }
+
+    ///
+    /// Handler for the RateLimit effect.
+    ///
+    /// Uses the "Sliding Window" approach to delay requests. Sleeps till the next slot is available, then proceeds. 
+    ///
+    pub def withSlidingWindow(windowSize: Int32, windowDuration: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Sleep + Time.Clock =
+        region rc {
+            ???   
         }
 
 }
