@@ -110,20 +110,24 @@ mod Retry {
     //
     // Main engine for running retry loops. Asks the retry effect what to do.
     //
-    pub def retryLoop(f: Unit -> Result[e,b] \ ef1): Result[e, b]\ ef1 + Retry + Time.Sleep = 
+    pub def retryLoop(g: e -> Bool \ ef2, f: Unit -> Result[e,b] \ ef1): Result[e, b]\ ef1 + Retry + Time.Sleep + ef2 = 
         @Tailrec
-        def loop(i: Int32): Result[e, b] \ ef1 + Retry + Time.Sleep = {
+        def loop(i: Int32): Result[e, b] \ ef1 + ef2 + Retry + Time.Sleep = {
             match f() {
                 case Ok(ok) => Ok(ok)
-                case Err(e) => {
-                    match Retry.ask(i) {
-                        case None => Err(e)
-                        case Some(duration) => {
-                            Time.Sleep.sleep(duration);
-                            loop(i+1)
+                case Err(e) => 
+                    if (not g(e)) {
+                        Err(e)
+                    }
+                    else {
+                        match Retry.ask(i) {
+                            case None => Err(e)
+                            case Some(duration) => {
+                                Time.Sleep.sleep(duration);
+                                loop(i+1)
+                            }
                         }
                     }
-                }
             }
         };
         loop(0)
@@ -133,7 +137,7 @@ mod Retry {
     ///
     pub def retry(pol: Policy[ef1], f: a -> Result[e, b] \ ef2): a -> Result[e, b] \ ef1 + (ef2 - Retry) + Time.Sleep = 
         x -> run {
-            Retry.retryLoop(() -> f(x))
+            Retry.retryLoop(_ -> true, () -> f(x))
         } with Retry.handle(pol)
 
     ///

@@ -1,10 +1,13 @@
 
 def dnsHandler(f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + Retry + Time.Sleep + Net.Dns = 
+    dnsConditionalHandler(_ -> true, f)
+
+def dnsConditionalHandler(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + ef2 + Retry + Time.Sleep + Net.Dns = 
     run {
         f()
     } with handler Net.Dns {
-        def lookup(host, k) = k(Retry.retryLoop(() -> Net.Dns.lookup(host)))
-        def lookupAll(host, k) = k(Retry.retryLoop(() -> Net.Dns.lookupAll(host)))
+        def lookup(host, k) = k(Retry.retryLoop(g, () -> Net.Dns.lookup(host)))
+        def lookupAll(host, k) = k(Retry.retryLoop(g, () -> Net.Dns.lookupAll(host)))
     }
 
 /*
