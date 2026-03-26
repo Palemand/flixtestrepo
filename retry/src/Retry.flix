@@ -88,7 +88,7 @@ mod Retry {
         })
 
     ///
-    /// A method that adds jitter to a policy. Is best used as the final modification.
+    /// A decorator that adds jitter to a policy. Is best used as the final modification.
     ///
     pub def addJitter(maxJitter: Duration, pol: Policy[ef]): Policy[ef + Math.Random] =
         Policy(i -> {
