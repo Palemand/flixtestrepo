@@ -65,4 +65,5 @@ pub def runShowcase(): Unit \ IO + Time.Sleep + Time.Clock = {
             List.forEach(fastTask, requests)
         } with RateLimit.withSlidingWindow(3, Time.Duration.milliseconds(100))
     })
+    // circuitbreak
 }

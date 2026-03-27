@@ -25,7 +25,7 @@ mod CircuitBreaker {
                     Err(err)
             }
         } else {
-            Err(IoError.IoError(IoError.ErrorKind.Other, "Circuit Breaker Open"))
+            Err(IoError.IoError(IoError.ErrorKind.Other, "Circuit Breaker is Open"))
         }
 
     ///
