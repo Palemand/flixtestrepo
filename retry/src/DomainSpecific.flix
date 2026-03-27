@@ -1,8 +1,8 @@
 // ------------- dns
-def dnsHandler(f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + Retry + Time.Sleep + Net.Dns = 
-    dnsConditionalHandler(_ -> true, f)
+def dnswithRetry(f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + Retry + Time.Sleep + Net.Dns = 
+    dnsConditionalwithRetry(_ -> true, f)
 
-def dnsConditionalHandler(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + ef2 + Retry + Time.Sleep + Net.Dns = 
+def dnsConditionalwithRetry(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Dns) + ef2 + Retry + Time.Sleep + Net.Dns = 
     run {
         f()
     } with handler Net.Dns {
@@ -11,10 +11,10 @@ def dnsConditionalHandler(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef
     }
 
 // ------------- http
-def httpHandler(f: Unit -> b \ ef1): b \ (ef1 - Net.Http) + Retry + Time.Sleep + Net.Http = 
-    httpConditionalHandler(_ -> true, f)
+def httpwithRetry(f: Unit -> b \ ef1): b \ (ef1 - Net.Http) + Retry + Time.Sleep + Net.Http = 
+    httpConditionalwithRetry(_ -> true, f)
 
-def httpConditionalHandler(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Http) + ef2 + Retry + Time.Sleep + Net.Http =
+def httpConditionalwithRetry(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Http) + ef2 + Retry + Time.Sleep + Net.Http =
     run {
         f()
     } with handler Net.Http {
@@ -23,10 +23,10 @@ def httpConditionalHandler(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (e
 
 
 // ------------- https
-def  httpsHandler(f: Unit -> b \ ef1): b \ (ef1 - Net.Https) + Retry + Time.Sleep + Net.Https = 
-    httpsConditionalHandler(_ -> true, f)
+def  httpswithRetry(f: Unit -> b \ ef1): b \ (ef1 - Net.Https) + Retry + Time.Sleep + Net.Https = 
+    httpsConditionalwithRetry(_ -> true, f)
 
-def httpsConditionalHandler(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Https) + ef2 + Retry + Time.Sleep + Net.Https =
+def httpsConditionalwithRetry(g: IoError -> Bool \ ef2, f: Unit -> b \ ef1): b \ (ef1 - Net.Https) + ef2 + Retry + Time.Sleep + Net.Https =
     run {
         f()
     } with handler Net.Https {
