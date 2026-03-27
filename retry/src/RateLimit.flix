@@ -19,11 +19,10 @@ mod RateLimit {
     ///
     /// Uses the minimum interval policy to enforce a minimum interval between requests. Given in `ims`
     ///
-    pub def withMinInterval(ims: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Clock + Time.Sleep + IO = 
+    pub def withMinInterval(ims: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Clock + Time.Sleep = 
         region rc {
             let lastReq = Ref.fresh(rc, 0i64);
             let imsNanos = Time.Duration.toNanos(ims);
-            println("Minimum interval set to ${imsNanos} nanoseconds");
             run {
                 f()
             } with handler RateLimit {
@@ -31,7 +30,6 @@ mod RateLimit {
                     let now = Time.Clock.currentTime(Nanoseconds);
                     let timeSinceLast = now - Ref.get(lastReq);
                     let wait = imsNanos - timeSinceLast;
-                    println("Time since last request: ${timeSinceLast}ns, need to wait: ${wait}ns");
                     if (wait > 0i64) {
                         Time.Sleep.sleep(Time.Duration.nanoseconds(wait))
                     };
