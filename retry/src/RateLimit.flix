@@ -79,9 +79,43 @@ mod RateLimit {
     ///
     /// Uses the "Sliding Window" approach to delay requests. Sleeps till the next slot is available, then proceeds. 
     ///
-    pub def withSlidingWindow(windowSize: Int32, windowDuration: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Sleep + Time.Clock =
+    pub def withSlidingWindow(windowSize: Int32, windowDuration: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Clock + Time.Sleep =
         region rc {
-            ???
+            let requestTimes: MutDeque[Int64, rc] = MutDeque.empty(rc);
+            let windowDurationNanos = Time.Duration.toNanos(windowDuration);
+            run {
+                f()
+            } with handler RateLimit {
+                def ask(k) = {
+                    let now = Time.Clock.currentTime(Nanoseconds);
+                    // Fjern forreste
+                    def evict() = {
+                        match MutDeque.peekFront(requestTimes) {
+                            case None => ()
+                            case Some(t) =>
+                                if (now - t >= windowDurationNanos) {
+                                    let _ = MutDeque.popFront(requestTimes);
+                                    evict()
+                                }
+                        }
+                    };    
+                    evict();
+                    if (MutDeque.size(requestTimes) < windowSize) {
+                        MutDeque.pushBack(now, requestTimes) 
+                    } else {
+                        match MutDeque.peekFront(requestTimes) {
+                            case None => bug!("Unexpected empty queue when full")
+                            case Some(x) => {
+                                let wait = windowDurationNanos - (now - x);
+                                Time.Sleep.sleep(Time.Duration.nanoseconds(wait));
+                                MutDeque.pushBack(Time.Clock.currentTime(Nanoseconds), requestTimes)
+                            }
+                        }
+                    };
+                    k(true)
+                    
+                }
+            }
         }
 
 }
