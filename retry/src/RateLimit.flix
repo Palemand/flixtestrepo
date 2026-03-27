@@ -48,14 +48,14 @@ mod RateLimit {
     ///
     pub def withTokenBucket(bucketSize: Int32, tokenDelay: Duration, f: Unit -> a \ ef1): a \ ef1 - RateLimit + Time.Sleep + Time.Clock =
         region rc {
-            let lastUpdate = Ref.fresh(rc, Time.Clock.now());
+            let lastUpdate = Ref.fresh(rc, Time.Clock.currentTime(Nanoseconds));
             let bucket = Ref.fresh(rc, bucketSize);
             let tokenDelayNanos = Time.Duration.toNanos(tokenDelay);
             run {
                 f()
             } with handler RateLimit {
                 def ask(k) = {
-                    let now = Time.Clock.now();
+                    let now = Time.Clock.currentTime(Nanoseconds);
                     let timeSinceLast = now - Ref.get(lastUpdate);
                     let newTokens = Int64.clampToInt32(min = 0, max = Int32.maxValue(), timeSinceLast / tokenDelayNanos);
                     if (newTokens > 0) {
