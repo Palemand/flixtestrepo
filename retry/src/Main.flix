@@ -7,12 +7,11 @@ use Time.TimeUnit.Nanoseconds
 
 /// A mock computationally/network fast task that we want to rate limit
 def fastTask(id: Int32): Unit \ RateLimit + IO + Time.Clock = {
-    let _ = RateLimit.limit(() -> {
+    RateLimit.limiter(() -> {
         println("  -> Executing Task #${id} at ${timeString()}");
         // Simulate that the task takes essentially 0 milliseconds
         () 
-    });
-    ()
+    })
 }
 
 /// Helper to print a simple time string for visual feedback
@@ -43,7 +42,7 @@ pub def runShowcase(): Unit \ IO + Time.Sleep + Time.Clock = {
     // measureTime("Minimum Interval: strictly 100ms spacing", () -> {
     //     run {
     //         List.forEach(fastTask, requests)
-    //     } with RateLimit.withMinInterval(milliseconds(20))
+    //     } with RateLimit.withMinInterval(milliseconds(20))<
     // })
     
     // ----------------------------------------------------
@@ -55,20 +54,15 @@ pub def runShowcase(): Unit \ IO + Time.Sleep + Time.Clock = {
     //  - Task 4 waits for 1 refill (sleeps ~100ms).
     //  - Task 5 waits for 1 refill (sleeps ~100ms). 
     // Total ~200ms.
-    measureTime("Token Bucket: Burst of 3, then 1 every 100ms", () -> {
-        run {
-            List.forEach(fastTask, requests)
-        } with RateLimit.withTokenBucket(3, milliseconds(100))
-    })
-
-    // ----------------------------------------------------
-    // DEMO 3: TOKEN BUCKET (Big Burst)
-    // ----------------------------------------------------
-    // We allow 10 tokens. We only make 5 requests.
-    // It should complete instantly (0ms) because it never runs out of tokens.
-    // measureTime("Token Bucket: Bucket of 10, only sending 5", () -> {
+    // measureTime("Token Bucket: Burst of 3, then 1 every 100ms", () -> {
     //     run {
     //         List.forEach(fastTask, requests)
-    //     } with RateLimit.withTokenBucket(10, milliseconds(500))
+    //     } with RateLimit.withTokenBucket(3, milliseconds(100))
     // })
+
+    measureTime("Sliding Window: 3 requests per 100ms (2nd run)", () -> {
+        run {
+            List.forEach(fastTask, requests)
+        } with RateLimit.withSlidingWindow(3, Time.Duration.milliseconds(100))
+    })
 }

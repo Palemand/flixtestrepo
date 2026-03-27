@@ -1,18 +1,18 @@
 pub eff RateLimit {
-    def ask(): Bool
+    def limit(): Unit
 }
 
 mod RateLimit {
     use Time.TimeUnit.Nanoseconds
     use Time.Duration
-
+    
+    ///
     /// A generic wrapper to trigger the effect.
-    pub def limit(f: Unit -> a \ ef): Option[a] \ ef + RateLimit =
-        if (RateLimit.ask()) {
-            Some(f())
-        } else {
-            None
-        }
+    ///
+    pub def limiter(f: Unit -> a \ ef): a \ ef + RateLimit =
+        RateLimit.limit();
+        f()
+        
 
     ///
     /// Handler for the RateLimit effect.
@@ -27,7 +27,7 @@ mod RateLimit {
             run {
                 f()
             } with handler RateLimit {
-                def ask(k) = {
+                def limit(k) = {
                     let now = Time.Clock.currentTime(Nanoseconds);
                     let timeSinceLast = now - Ref.get(lastReq);
                     let wait = imsNanos - timeSinceLast;
@@ -36,7 +36,7 @@ mod RateLimit {
                         Time.Sleep.sleep(Time.Duration.nanoseconds(wait))
                     };
                     Ref.put(Time.Clock.currentTime(Nanoseconds), lastReq);
-                    k(true)
+                    k()
                 }
             }
         }
@@ -54,7 +54,7 @@ mod RateLimit {
             run {
                 f()
             } with handler RateLimit {
-                def ask(k) = {
+                def limit(k) = {
                     let now = Time.Clock.currentTime(Nanoseconds);
                     let timeSinceLast = now - Ref.get(lastUpdate);
                     let newTokens = Int64.clampToInt32(min = 0, max = Int32.maxValue(), timeSinceLast / tokenDelayNanos);
@@ -69,7 +69,7 @@ mod RateLimit {
                         Time.Sleep.sleep(Time.Duration.nanoseconds(wait));
                         Ref.put(Ref.get(lastUpdate) + tokenDelayNanos, lastUpdate)
                     };
-                    k(true)   
+                    k()
                 }
             }
         }
@@ -86,7 +86,7 @@ mod RateLimit {
             run {
                 f()
             } with handler RateLimit {
-                def ask(k) = {
+                def limit(k) = {
                     let now = Time.Clock.currentTime(Nanoseconds);
                     // Fjern forreste
                     def evict() = {
@@ -112,8 +112,7 @@ mod RateLimit {
                             }
                         }
                     };
-                    k(true)
-                    
+                    k()
                 }
             }
         }

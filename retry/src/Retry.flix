@@ -110,7 +110,7 @@ mod Retry {
     //
     // Main engine for running retry loops. Asks the retry effect what to do.
     //
-    pub def retryLoop(g: e -> Bool \ ef2, f: Unit -> Result[e,b] \ ef1): Result[e, b]\ ef1 + Retry + Time.Sleep + ef2 = 
+    pub def retryLoop(g: e -> Bool \ ef2, f: Unit -> Result[e, b] \ ef1): Result[e, b]\ ef1 + Retry + Time.Sleep + ef2 = 
         @Tailrec
         def loop(i: Int32): Result[e, b] \ ef1 + ef2 + Retry + Time.Sleep = {
             match f() {
