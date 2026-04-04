@@ -13,7 +13,6 @@ mod RateLimit {
         RateLimit.limit();
         f()
         
-
     ///
     /// Handler for the RateLimit effect.
     ///
