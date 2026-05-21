@@ -18,7 +18,7 @@ public class Main {
         }
     }
     
-    public static void throwException() throws MyException {
+    public static void throwException() throws Exception {
         throw new MyException("Exception from throwException method.");
     }
 

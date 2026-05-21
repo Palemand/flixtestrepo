@@ -1,4 +1,4 @@
-use Console.print
+use Sys.Console.print
 use MyPrint.myPrint
 /* eff DivByZero {
     def divByZero(): Void

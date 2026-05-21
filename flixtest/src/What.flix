@@ -1,4 +1,4 @@
-
+use Sys.Console
 def main2(): Unit \ IO = 
     ???
 
