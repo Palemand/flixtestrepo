@@ -3,6 +3,7 @@ use List.range
 use Range.Range
 use RoundResult.Loss
 use RoundResult.Draw
+use Sys.Console
 
 import java.lang.Math
 
